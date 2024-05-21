@@ -1,14 +1,8 @@
 import Message from "../messages/message-model.js";
+import generateAvatarURL from "../utility/generateAvatarURL.js";
 import Chat from "./chat-model.js"
 
 const chatService = {
-
-    // data we would need
-    // const chatData = {
-    //     userIds : [1, 2],
-    //     messageContent : 'hello',
-    //     author : 1
-    // },
 
     createOrAppendChat: async (userIds, messageContent, author) => {
         try {
@@ -46,6 +40,44 @@ const chatService = {
             console.error('Error creating or appending chat:', error);
             throw error;
         }
+    },
+
+    getChats: async (meId) => {
+        console.log(meId, typeof meId)
+        const chats = await Chat.find({ users: { $in: [meId] } })
+            .sort({ updatedAt: -1 })
+            .populate({
+                path: 'users',
+                match: { _id: { $ne: meId } },
+                select: '-password',
+            })
+            .populate('lastMessage')
+            .exec();
+
+        // Format the response to include me and otherUser fields
+        const formattedChats = chats.map(chat => {
+            const otherUser = chat.users.find((user) => user._id.toString() !== meId.toString());
+            return {
+                _id: chat._id.toString(),
+                me: {
+                    _id: meId.toString(),
+                },
+                contact: otherUser ? {
+                    _id: otherUser._id.toString(),
+                    name: otherUser.name,
+                    email: otherUser.email,
+                    bio: otherUser.bio,
+                    avatar: generateAvatarURL(otherUser.avatar),
+                    createdAt: otherUser.createdAt,
+                    updatedAt: otherUser.updatedAt,
+                } : null,
+                lastMessage: chat.lastMessage,
+                createdAt: chat.createdAt.toISOString(),
+                updatedAt: chat.updatedAt.toISOString(),
+            };
+        });
+
+        return formattedChats;
     }
 }
 
