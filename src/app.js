@@ -30,7 +30,7 @@ handleSocket(io)
 
 
 // add routes here
-app.use('/users', userRouter)
+app.use('/api/users', userRouter)
 
 
 // Global error handling

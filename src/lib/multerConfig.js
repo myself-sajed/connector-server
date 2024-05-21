@@ -5,7 +5,6 @@ import path from 'path'
 // Practice path here and paste as it is in as an argument you're willing to call
 
 const __dirname = path.join(process.cwd(), `/src`);
-console.log(__dirname)
 
 const multerConfig = (uploadPath = `./uploads/avatars`) => {
     const storage = multer.diskStorage({
