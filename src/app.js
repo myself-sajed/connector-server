@@ -4,7 +4,7 @@ import express from "express";
 import { Server as SocketServer } from 'socket.io'
 import http from 'http'
 import cors from 'cors'
-import config from "./lib/config.js";
+import config from "./lib/envConfig.js";
 import bodyParser from "body-parser";
 
 // routes 
