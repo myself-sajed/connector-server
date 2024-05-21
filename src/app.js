@@ -5,6 +5,7 @@ import { Server as SocketServer } from 'socket.io'
 import http from 'http'
 import cors from 'cors'
 import config from "./lib/config.js";
+import bodyParser from "body-parser";
 
 // routes 
 import userRouter from './users/user-routes.js'
@@ -15,6 +16,7 @@ import handleSocket from "./socket/socket-server.js";
 const app = express();
 app.use(cors())
 app.use(express.json());
+app.use(bodyParser.json());
 
 
 // socket config
