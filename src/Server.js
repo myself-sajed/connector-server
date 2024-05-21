@@ -2,10 +2,12 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 import app from "../src/app.js";
-import config from './lib/config.js';
+import config from './lib/envConfig.js';
+import connectToDB from './lib/dbConfig.js';
 
-const startServer = () => {
+const startServer = async () => {
     try {
+        await connectToDB()
         const PORT = config.PORT;
         app.listen(PORT, () => console.log(`Server running at ${PORT}`));
     } catch (error) {
