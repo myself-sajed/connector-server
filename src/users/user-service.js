@@ -1,4 +1,4 @@
-import config from '../lib/envConfig.js'
+import generateAvatarURL from '../utility/generateAvatarURL.js'
 import User from './user-model.js'
 
 const userService = {
@@ -15,7 +15,7 @@ const userService = {
             const usersWithAvatarURL = users.map((user) => {
                 return {
                     ...user,
-                    avatar: config.BACKEND_URL + '/api/users/avatar/' + user.avatar
+                    avatar: generateAvatarURL(user.avatar)
                 }
             })
 
