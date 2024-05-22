@@ -22,7 +22,8 @@ const userController = {
     },
 
     getUsers: async (req, res) => {
-        const users = await userService.getUsers()
+        const { loggedInUserId } = req.params
+        const users = await userService.getUsers(loggedInUserId)
         res.send(users || [])
     },
 
