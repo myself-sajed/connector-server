@@ -6,16 +6,6 @@ function handleSocket(io) {
     io.on("connection", (socket) => {
         socket.on('register', (userId) => {
             userSocketMap.set(userId, socket.id); // Map user ID to socket ID
-            console.log(`User ${userId} connected with socket ID ${socket.id}`);
-            console.log("===========================================")
-            let d = new Date,
-                dformat = d.getHours() + ':' + [
-                    d.getMinutes() + ':' +
-                    d.getSeconds(),
-                ].join(' ');
-
-            console.log("userSocketMap :", dformat, userSocketMap)
-            console.log("===========================================")
         });
 
         socket.on('message:client', async (chatData) => {
