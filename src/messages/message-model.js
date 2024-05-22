@@ -21,6 +21,11 @@ const messageSchema = new Schema({
         ref: 'User',
         require: true
     },
+    interactedUsers: {
+        type: [Schema.Types.ObjectId],
+        ref: 'User',
+        require: true
+    },
     chatId: {
         type: Schema.Types.ObjectId,
         ref: 'Chat',
