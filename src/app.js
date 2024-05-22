@@ -10,6 +10,9 @@ import bodyParser from "body-parser";
 // routes 
 import userRouter from './users/user-routes.js'
 import chatRouter from './chats/chat-routes.js'
+import messageRouter from './messages//message-routes.js'
+
+//other imports
 import handleSocket from "./socket/socket-server.js";
 
 
@@ -33,6 +36,7 @@ handleSocket(io)
 // add routes here
 app.use('/api/users', userRouter)
 app.use('/api/chats', chatRouter)
+app.use('/api/messages', messageRouter)
 
 
 // Global error handling
