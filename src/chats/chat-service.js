@@ -44,30 +44,45 @@ const chatService = {
 
             await chat.populate({
                 path: 'users',
-                match: { _id: selectedContactId },
                 select: '-password'
             })
 
             await chat.populate('lastMessage')
 
-            const otherUser = chat.users[0]
-            const selectedContactUser = {
+            const selectedUser1 = chat.users[0]
+            const user1 = {
                 _id: chat._id,
-                contact: otherUser ? {
-                    _id: otherUser._id.toString(),
-                    name: otherUser.name,
-                    email: otherUser.email,
-                    bio: otherUser.bio,
-                    avatar: generateAvatarURL(otherUser.avatar),
-                    createdAt: otherUser.createdAt,
-                    updatedAt: otherUser.updatedAt,
+                contact: selectedUser1 ? {
+                    _id: selectedUser1._id.toString(),
+                    name: selectedUser1.name,
+                    email: selectedUser1.email,
+                    bio: selectedUser1.bio,
+                    avatar: generateAvatarURL(selectedUser1.avatar),
+                    createdAt: selectedUser1.createdAt,
+                    updatedAt: selectedUser1.updatedAt,
+                } : null,
+                lastMessage: chat.lastMessage,
+                createdAt: chat.createdAt.toISOString(),
+                updatedAt: chat.updatedAt.toISOString(),
+            }
+            const selectedUser2 = chat.users[1]
+            const user2 = {
+                _id: chat._id,
+                contact: selectedUser2 ? {
+                    _id: selectedUser2._id.toString(),
+                    name: selectedUser2.name,
+                    email: selectedUser2.email,
+                    bio: selectedUser2.bio,
+                    avatar: generateAvatarURL(selectedUser2.avatar),
+                    createdAt: selectedUser2.createdAt,
+                    updatedAt: selectedUser2.updatedAt,
                 } : null,
                 lastMessage: chat.lastMessage,
                 createdAt: chat.createdAt.toISOString(),
                 updatedAt: chat.updatedAt.toISOString(),
             }
 
-            return { chat, selectedContactUser, message };
+            return { chat, user1, user2, message };
         } catch (error) {
             console.error('Error creating or appending chat:', error);
             throw error;
