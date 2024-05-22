@@ -3,34 +3,16 @@ import Message from "./message-model.js"
 
 
 const messageService = {
-    getMessages: async (chatId, meId) => {
+    getMessages: async (contactId, meId) => {
 
-        // check if chat exists
-        const chat = await Chat.findOne({ _id: chatId })
-        if (chat) {
-            const messages = await Message.find({ chatId: chatId }).populate("author").exec()
-
-            if (!messages) {
-                return []
-            }
-
-            return messages
-        } else {
-
-            const chat = await Chat.findOne({ users: { $all: [meId, chatId], $size: 2 } })
-
-            if (chat) {
-                const messages = await Message.find({ chatId: chat._id }).populate("author").exec()
-
-                if (!messages) {
-                    return []
-                }
-
-                return messages
-            }
-
+        try {
+            const messages = await Message.find({ interactedUsers: { $all: [contactId, meId] } }).populate("author").exec();
+            return messages || []
+        } catch (error) {
+            console.log('error occured in getting messages:', error)
             return []
         }
+
     }
 }
 
