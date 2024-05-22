@@ -4,7 +4,7 @@ import Chat from "./chat-model.js"
 
 const chatService = {
 
-    createOrAppendChat: async (userIds, messageContent, author) => {
+    createOrAppendChat: async (userIds, messageContent, author, selectedContactId) => {
         try {
             // Check if an individual chat already exists with these users
             let chat = await Chat.findOne({ chatType: 'individual', users: { $all: userIds, $size: userIds.length } });
@@ -18,10 +18,12 @@ const chatService = {
                 await chat.save();
             }
 
+
             // Create a new message
-            const message = new Message({
+            let message = new Message({
                 author: author,
                 chatId: chat._id,
+                interactedUsers: userIds,
                 type: 'text',
                 seen: false,
                 filename: null,
@@ -30,12 +32,44 @@ const chatService = {
 
             await message.save();
 
+            message = await Message.findById(message._id).lean().populate('author').exec()
+
+            console.log(message)
+
+
             // Append the message to the chat
             chat.messages.push(message._id);
             chat.lastMessage = message._id;
             await chat.save();
 
-            return chat;
+
+
+            await chat.populate({
+                path: 'users',
+                match: { _id: selectedContactId },
+                select: '-password'
+            })
+
+            await chat.populate('lastMessage')
+
+            const otherUser = chat.users[0]
+            const selectedContactUser = {
+                _id: chat._id,
+                contact: otherUser ? {
+                    _id: otherUser._id.toString(),
+                    name: otherUser.name,
+                    email: otherUser.email,
+                    bio: otherUser.bio,
+                    avatar: generateAvatarURL(otherUser.avatar),
+                    createdAt: otherUser.createdAt,
+                    updatedAt: otherUser.updatedAt,
+                } : null,
+                lastMessage: chat.lastMessage,
+                createdAt: chat.createdAt.toISOString(),
+                updatedAt: chat.updatedAt.toISOString(),
+            }
+
+            return { chat, selectedContactUser, message };
         } catch (error) {
             console.error('Error creating or appending chat:', error);
             throw error;
@@ -44,6 +78,7 @@ const chatService = {
 
     getChats: async (meId) => {
         try {
+            console.log('i am in get chats:', meId);
             const chats = await Chat.find({ users: { $in: [meId] } })
                 .sort({ updatedAt: -1 })
                 .populate({
@@ -79,6 +114,7 @@ const chatService = {
 
             return formattedChats;
         } catch (error) {
+            console.log('error in get chats :', error);
             return []
         }
     }
