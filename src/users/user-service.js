@@ -8,8 +8,8 @@ const userService = {
         return await user.save()
     },
 
-    getUsers: async () => {
-        const users = await User.find({}).lean()
+    getUsers: async (loggedInUserId) => {
+        const users = await User.find({ _id: { $ne: loggedInUserId } }).lean()
 
         if (users?.length > 0) {
             const usersWithAvatarURL = users.map((user) => {
