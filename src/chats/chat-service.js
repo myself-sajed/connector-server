@@ -34,8 +34,6 @@ const chatService = {
 
             message = await Message.findById(message._id).lean().populate('author').exec()
 
-            console.log(message)
-
 
             // Append the message to the chat
             chat.messages.push(message._id);
@@ -78,7 +76,6 @@ const chatService = {
 
     getChats: async (meId) => {
         try {
-            console.log('i am in get chats:', meId);
             const chats = await Chat.find({ users: { $in: [meId] } })
                 .sort({ updatedAt: -1 })
                 .populate({
