@@ -7,27 +7,30 @@ function handleSocket(io) {
         socket.on('register', (userId) => {
             userSocketMap.set(userId, socket.id); // Map user ID to socket ID
             console.log(`User ${userId} connected with socket ID ${socket.id}`);
+            console.log("===========================================")
+            let d = new Date,
+                dformat = d.getHours() + ':' + [
+                    d.getMinutes() + ':' +
+                    d.getSeconds(),
+                ].join(' ');
+
+            console.log("userSocketMap :", dformat, userSocketMap)
+            console.log("===========================================")
         });
 
         socket.on('message:client', async (chatData) => {
-            const { userIds, messageContent, author } = chatData;
-            const chat = await chatService.createOrAppendChat(userIds, messageContent, author);
+            const { userIds, messageContent, author, selectedContactId } = chatData;
+            const { chat, selectedContactUser, message } = await chatService.createOrAppendChat(userIds, messageContent, author, selectedContactId);
 
-            // Get the recipient's user ID
-            const recipientId = userIds.find(id => id !== author);
-
-            // Get the socket IDs of the sender and recipient
-            const senderSocketId = userSocketMap.get(author);
-            const recipientSocketId = userSocketMap.get(recipientId);
-
-            // Emit the message to the sender and recipient
-            if (senderSocketId) {
-                io.to(senderSocketId).emit("message:server", { text: messageContent, author: { _id: author }, chat });
-            }
-
-            if (recipientSocketId) {
-                io.to(recipientSocketId).emit("message:server", { text: messageContent, author: { _id: author }, chat });
-            }
+            userIds.forEach((userId) => {
+                let socketId = userSocketMap.get(userId)
+                if (socketId) {
+                    io.to(socketId).emit("message:server", {
+                        message,
+                        selectedContactUser
+                    });
+                }
+            })
         });
 
         socket.on("disconnect", async () => {
