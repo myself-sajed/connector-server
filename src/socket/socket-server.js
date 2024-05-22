@@ -6,19 +6,18 @@ function handleSocket(io) {
     io.on("connection", (socket) => {
         socket.on('register', (userId) => {
             userSocketMap.set(userId, socket.id); // Map user ID to socket ID
+            // console.log('Socket user map:', userSocketMap);
         });
 
         socket.on('message:client', async (chatData) => {
             const { userIds, messageContent, author, selectedContactId } = chatData;
-            const { chat, selectedContactUser, message } = await chatService.createOrAppendChat(userIds, messageContent, author, selectedContactId);
+            const { user1, user2, message, } = await chatService.createOrAppendChat(userIds, messageContent, author, selectedContactId);
 
             userIds.forEach((userId) => {
                 let socketId = userSocketMap.get(userId)
                 if (socketId) {
-                    io.to(socketId).emit("message:server", {
-                        message,
-                        selectedContactUser
-                    });
+                    io.to(socketId).emit("message:server", { message });
+                    io.to(socketId).emit("chat:server", userId !== user1.contact._id ? user1 : user2)
                 }
             })
         });
