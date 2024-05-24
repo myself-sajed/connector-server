@@ -32,6 +32,9 @@ const io = new SocketServer(server, {
 });
 handleSocket(io)
 
+app.get('/', function (req, res) {
+    res.send({ message: "Welcome to Connector Server! Have a good day." })
+})
 
 // add routes here
 app.use('/api/users', userRouter)
