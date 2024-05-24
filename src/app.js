@@ -27,7 +27,8 @@ app.use(bodyParser.json());
 const server = http.createServer(app);
 const io = new SocketServer(server, {
     cors: {
-        origin: config.FRONTEND_URL
+        origin: "*",
+        methods: ['GET', 'POST']
     }
 });
 handleSocket(io)
