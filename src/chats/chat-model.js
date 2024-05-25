@@ -9,8 +9,9 @@ const chatSchema = new Schema({
         default: 'individual',
     },
     users: [{ type: Schema.Types.ObjectId, ref: 'User', required: true }],
-    messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
+    messages: [{ type: Schema.Types.ObjectId, ref: 'Message', required: false, default: [] }],
     lastMessage: { type: Schema.Types.ObjectId, ref: 'Message' },
+    chatable: { type: Schema.Types.Boolean, default: false, required: false }
 }, { timestamps: true });
 
 
