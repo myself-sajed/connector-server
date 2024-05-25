@@ -4,20 +4,44 @@ import Chat from "./chat-model.js"
 
 const chatService = {
 
-    createOrAppendChat: async (userIds, messageContent, author, selectedContactId) => {
+    createChat: async (contactId, meId) => {
         try {
-            // Check if an individual chat already exists with these users
-            let chat = await Chat.findOne({ chatType: 'individual', users: { $all: userIds, $size: userIds.length } });
+            // Find the chat with both users
+            let foundChat = await Chat.findOne({ users: { $all: [contactId, meId], $size: 2 } })
+                .populate("users", "-password")
+                .populate("lastMessage")
+                .exec();
 
-            // If chat does not exist, create a new one
-            if (!chat) {
-                chat = new Chat({
+            if (foundChat) {
+                const chat = chatFormatter([foundChat], meId)[0];
+                return { status: 'success', chat: chat };
+            } else {
+                // Create a new chat
+                const newChat = new Chat({
                     chatType: 'individual',
-                    users: userIds,
+                    users: [contactId, meId]
                 });
-                await chat.save();
-            }
 
+                await newChat.save();
+
+                await newChat.populate({
+                    path: 'users',
+                    select: '-password'
+                });
+
+                const formattedChat = chatFormatter([newChat], meId)[0];
+                return { status: 'success', chat: formattedChat };
+            }
+        } catch (error) {
+            console.log(error);
+            return { status: 'error', message: "Connector could not create connection, try again later." };
+        }
+    },
+
+    createOrAppendChat: async (chatId, userIds, messageContent, author) => {
+        try {
+
+            let chat = await Chat.findOne({ _id: chatId });
 
             // Create a new message
             let message = new Message({
@@ -38,51 +62,10 @@ const chatService = {
             // Append the message to the chat
             chat.messages.push(message._id);
             chat.lastMessage = message._id;
+            chat.chatable = true
             await chat.save();
 
-
-
-            await chat.populate({
-                path: 'users',
-                select: '-password'
-            })
-
-            await chat.populate('lastMessage')
-
-            const selectedUser1 = chat.users[0]
-            const user1 = {
-                _id: chat._id,
-                contact: selectedUser1 ? {
-                    _id: selectedUser1._id.toString(),
-                    name: selectedUser1.name,
-                    email: selectedUser1.email,
-                    bio: selectedUser1.bio,
-                    avatar: generateAvatarURL(selectedUser1.avatar),
-                    createdAt: selectedUser1.createdAt,
-                    updatedAt: selectedUser1.updatedAt,
-                } : null,
-                lastMessage: chat.lastMessage,
-                createdAt: chat.createdAt.toISOString(),
-                updatedAt: chat.updatedAt.toISOString(),
-            }
-            const selectedUser2 = chat.users[1]
-            const user2 = {
-                _id: chat._id,
-                contact: selectedUser2 ? {
-                    _id: selectedUser2._id.toString(),
-                    name: selectedUser2.name,
-                    email: selectedUser2.email,
-                    bio: selectedUser2.bio,
-                    avatar: generateAvatarURL(selectedUser2.avatar),
-                    createdAt: selectedUser2.createdAt,
-                    updatedAt: selectedUser2.updatedAt,
-                } : null,
-                lastMessage: chat.lastMessage,
-                createdAt: chat.createdAt.toISOString(),
-                updatedAt: chat.updatedAt.toISOString(),
-            }
-
-            return { chat, user1, user2, message };
+            return { message };
         } catch (error) {
             console.error('Error creating or appending chat:', error);
             throw error;
@@ -95,35 +78,13 @@ const chatService = {
                 .sort({ updatedAt: -1 })
                 .populate({
                     path: 'users',
-                    match: { _id: { $ne: meId } },
                     select: '-password',
                 })
                 .populate('lastMessage')
                 .exec();
 
             // Format the response to include me and otherUser fields
-            const formattedChats = chats.map(chat => {
-                const otherUser = chat.users.find((user) => user._id.toString() !== meId.toString());
-                return {
-                    _id: chat._id.toString(),
-                    me: {
-                        _id: meId.toString(),
-                    },
-                    contact: otherUser ? {
-                        _id: otherUser._id.toString(),
-                        name: otherUser.name,
-                        email: otherUser.email,
-                        bio: otherUser.bio,
-                        avatar: generateAvatarURL(otherUser.avatar),
-                        createdAt: otherUser.createdAt,
-                        updatedAt: otherUser.updatedAt,
-                    } : null,
-                    lastMessage: chat.lastMessage,
-                    createdAt: chat.createdAt.toISOString(),
-                    updatedAt: chat.updatedAt.toISOString(),
-                };
-            });
-
+            const formattedChats = chatFormatter(chats, meId)
             return formattedChats;
         } catch (error) {
             console.log('error in get chats :', error);
@@ -134,3 +95,38 @@ const chatService = {
 
 
 export default chatService
+
+
+function chatFormatter(chats, meId) {
+    const formattedChats = chats.map(chat => {
+        const otherUser = chat.users.find((user) => user._id.toString() !== meId.toString());
+        const meUser = chat.users.find((user) => user._id.toString() === meId.toString());
+        return {
+            _id: chat._id.toString(),
+            chatable: chat.chatable,
+            me: meUser ? {
+                _id: meId.toString(),
+                name: meUser.name,
+                email: meUser.email,
+                bio: meUser.bio,
+                avatar: generateAvatarURL(meUser.avatar),
+                createdAt: meUser.createdAt,
+                updatedAt: meUser.updatedAt,
+            } : null,
+            contact: otherUser ? {
+                _id: otherUser._id.toString(),
+                name: otherUser.name,
+                email: otherUser.email,
+                bio: otherUser.bio,
+                avatar: generateAvatarURL(otherUser.avatar),
+                createdAt: otherUser.createdAt,
+                updatedAt: otherUser.updatedAt,
+            } : null,
+            lastMessage: chat.lastMessage || null,
+            createdAt: chat.createdAt.toISOString() || null,
+            updatedAt: chat.updatedAt.toISOString() || null,
+        };
+    });
+
+    return formattedChats
+}
