@@ -31,10 +31,13 @@ const messageSchema = new Schema({
         ref: 'Chat',
         require: true
     },
-    seen: {
-        type: Boolean,
-        default: false
+    status: {
+        type: String,
+        enum: ['sent', 'delivered', 'seen'],
+        default: 'sent'
     },
+    deliveredAt: Date,
+    seenAt: Date,
 }, { timestamps: true });
 
 

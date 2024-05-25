@@ -54,7 +54,7 @@ const chatService = {
                 text: messageContent,
             });
 
-            await message.save();
+            const operationalMessage = await message.save();
 
             message = await Message.findById(message._id).lean().populate('author').exec()
 
@@ -65,7 +65,7 @@ const chatService = {
             chat.chatable = true
             await chat.save();
 
-            return { message };
+            return { operationalMessage, message };
         } catch (error) {
             console.error('Error creating or appending chat:', error);
             throw error;
