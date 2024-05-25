@@ -8,10 +8,34 @@ const chatSchema = new Schema({
         enum: ['individual', 'group'],
         default: 'individual',
     },
-    users: [{ type: Schema.Types.ObjectId, ref: 'User', required: true }],
-    messages: [{ type: Schema.Types.ObjectId, ref: 'Message', required: false, default: [] }],
-    lastMessage: { type: Schema.Types.ObjectId, ref: 'Message' },
-    chatable: { type: Schema.Types.Boolean, default: false, required: false }
+    users: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        }
+    ],
+    messages: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Message',
+            required: false,
+            default: []
+        }],
+    lastMessage: {
+        type: Schema.Types.ObjectId,
+        ref: 'Message'
+    },
+    chatable: {
+        type: Schema.Types.Boolean,
+        default: false,
+        required: false
+    },
+    unreadMessageCount: {
+        type: Number,
+        default: 0,
+        required: false
+    }
 }, { timestamps: true });
 
 
