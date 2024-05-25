@@ -1,6 +1,11 @@
 import chatService from "./chat-service.js"
 
 const chatController = {
+    createChat: async (req, res) => {
+        const { contactId, meId } = req.body
+        const result = await chatService.createChat(contactId, meId)
+        res.send(result)
+    },
     getChats: async (req, res) => {
         const { meId } = req.params
         const chats = await chatService.getChats(meId)
