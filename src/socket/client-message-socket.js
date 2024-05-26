@@ -7,7 +7,6 @@ function handleOnClientMessage(io, socket, userSocketMap) {
 
     socket.on('message:client', async (chatData) => {
         const { selectedChat, messageContent, author, tempMessageId } = chatData;
-        console.log(selectedChat)
         const userIds = [selectedChat?.me._id, selectedChat?.contact._id];
         const chatId = selectedChat?._id
         const { message, operationalMessage } = await chatService.createOrAppendChat(chatId, userIds, messageContent, author);
@@ -47,7 +46,6 @@ function handleOnClientMessage(io, socket, userSocketMap) {
         })
 
         if (messages.length > 0) {
-            console.log('sent to client')
             io.to(userSocketMap.get(userId)).emit("chat:unreadCount", { chatId })
         }
 
