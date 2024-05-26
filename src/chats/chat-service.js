@@ -80,6 +80,10 @@ const chatService = {
                     path: 'users',
                     select: '-password',
                 })
+                .populate({
+                    path: 'messages',
+                    match: { status: { $ne: 'seen' } }
+                })
                 .populate('lastMessage')
                 .exec();
 
@@ -104,6 +108,11 @@ function chatFormatter(chats, meId) {
         return {
             _id: chat._id.toString(),
             chatable: chat.chatable,
+            unreadCount: {
+                [otherUser._id.toString()]: ((chat?.messages || []).filter((msg) => {
+                    return msg.author.toString() !== meId.toString()
+                })?.length) || 0
+            },
             me: meUser ? {
                 _id: meId.toString(),
                 name: meUser.name,
@@ -111,7 +120,7 @@ function chatFormatter(chats, meId) {
                 bio: meUser.bio,
                 avatar: generateAvatarURL(meUser.avatar),
                 createdAt: meUser.createdAt,
-                updatedAt: meUser.updatedAt,
+                updatedAt: meUser.updatedAt
             } : null,
             contact: otherUser ? {
                 _id: otherUser._id.toString(),

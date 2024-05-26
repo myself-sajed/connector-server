@@ -7,6 +7,7 @@ function handleOnClientMessage(io, socket, userSocketMap) {
 
     socket.on('message:client', async (chatData) => {
         const { selectedChat, messageContent, author, tempMessageId } = chatData;
+        console.log(selectedChat)
         const userIds = [selectedChat?.me._id, selectedChat?.contact._id];
         const chatId = selectedChat?._id
         const { message, operationalMessage } = await chatService.createOrAppendChat(chatId, userIds, messageContent, author);
@@ -15,16 +16,15 @@ function handleOnClientMessage(io, socket, userSocketMap) {
             let socketId = userSocketMap.get(userId)
             if (socketId) {
                 io.to(socketId).emit("message:server", { message, tempMessageId });
-
                 const chat = {
                     _id: selectedChat._id,
                     me: userId === selectedChat?.me._id ? selectedChat?.me : selectedChat?.contact,
                     contact: userId !== selectedChat?.me._id ? selectedChat?.me : selectedChat?.contact,
                     lastMessage: message,
-                    chatable: true
+                    chatable: true,
                 }
 
-                io.to(socketId).emit("chat:server", chat)
+                io.to(socketId).emit("chat:server", { chat, shouldUpdateCount: (userId === author) })
 
                 if (userId !== author) { // only update status for the recipient
                     operationalMessage.status = 'delivered';
@@ -37,15 +37,19 @@ function handleOnClientMessage(io, socket, userSocketMap) {
         })
     });
 
-    socket.on("client:status:delivered", async ({ chatId, userId }) => {
-        const messages = await messageModel.find({ chatId, author: { $ne: userId } })
+    socket.on("client:status:delivered", async ({ chatId, userId, contactId }) => {
+        const messages = await messageModel.find({ chatId, author: { $ne: userId }, status: { $ne: 'seen' } })
 
         messages.forEach(async (message) => {
             message.status = "seen"
             await message.save();
-
             io.to(userSocketMap.get(message.author.toString())).emit("server:status:delivered", message)
         })
+
+        if (messages.length > 0) {
+            console.log('sent to client')
+            io.to(userSocketMap.get(userId)).emit("chat:unreadCount", { chatId })
+        }
 
     })
 }
