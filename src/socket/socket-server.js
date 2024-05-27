@@ -1,4 +1,5 @@
 import handleOnClientMessage from "./client-message-socket.js";
+import handleMessageOperations from "./handleMessageOperations.js";
 import { handleSocketDisconnection, registerSocketUser } from "./register-disconnection-socket.js";
 
 const userSocketMap = new Map();
@@ -7,6 +8,7 @@ function handleSocket(io) {
     io.on("connection", (socket) => {
         registerSocketUser(io, socket, userSocketMap);
         handleOnClientMessage(io, socket, userSocketMap);
+        handleMessageOperations(io, socket, userSocketMap);
         handleSocketDisconnection(socket, userSocketMap);
     });
 }
