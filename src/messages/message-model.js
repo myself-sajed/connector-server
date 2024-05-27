@@ -39,6 +39,12 @@ const messageSchema = new Schema({
     isEdited: {
         type: Boolean,
         default: false
+    },
+    messageRepliedTo: {
+        type: Schema.Types.ObjectId,
+        ref: 'Message',
+        require: false,
+        default: null
     }
 
 }, { timestamps: true });

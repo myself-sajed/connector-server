@@ -1,15 +1,16 @@
 import chatService from "../chats/chat-service.js";
 import messageModel from "../messages/message-model.js";
 import chatModel from "../chats/chat-model.js";
+import messageService from "../messages/message-service.js";
 
 
 function handleOnClientMessage(io, socket, userSocketMap) {
 
     socket.on('message:client', async (chatData) => {
-        const { selectedChat, messageContent, author, tempMessageId } = chatData;
+        const { selectedChat, messageContent, author, tempMessageId, messageRepliedTo } = chatData;
         const userIds = [selectedChat?.me._id, selectedChat?.contact._id];
         const chatId = selectedChat?._id
-        const { message, operationalMessage } = await chatService.createOrAppendChat(chatId, userIds, messageContent, author);
+        const { message, operationalMessage } = await chatService.createOrAppendChat(chatId, userIds, messageContent, author, messageRepliedTo);
 
         userIds.forEach(async (userId) => {
             let socketId = userSocketMap.get(userId)
@@ -49,6 +50,21 @@ function handleOnClientMessage(io, socket, userSocketMap) {
             io.to(userSocketMap.get(userId)).emit("chat:unreadCount", { chatId })
         }
 
+    })
+
+    socket.on("message:client:delete", async (message) => {
+        const isDeleted = await messageService.deleteMessage(message)
+
+        if (isDeleted) {
+            const userIds = message.interactedUsers;
+
+            userIds.forEach((userId) => {
+                io.to(userSocketMap.get(userId)).emit("message:server:delete", message)
+            })
+
+        } else {
+            console.log('could not delete message')
+        }
     })
 }
 

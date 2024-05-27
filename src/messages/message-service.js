@@ -5,7 +5,7 @@ import Message from "./message-model.js"
 const messageService = {
     getMessages: async (chatId) => {
         try {
-            const messages = await Message.find({ chatId }).lean().populate("author").exec();
+            const messages = await Message.find({ chatId }).lean().populate("author").populate("messageRepliedTo").exec();
             return messages || []
         } catch (error) {
             console.log('error occured in getting messages:', error)
@@ -27,6 +27,16 @@ const messageService = {
         const userIds = message.interactedUsers.map(userId => userId.toString())
 
         return { message, lastMessage, userIds, operationalMessage: message }
+    },
+
+
+    deleteMessage: async (message) => {
+        try {
+            await Message.findOneAndDelete({ _id: message._id })
+            return true
+        } catch (error) {
+            return false
+        }
     }
 }
 

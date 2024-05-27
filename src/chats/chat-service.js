@@ -38,7 +38,7 @@ const chatService = {
         }
     },
 
-    createOrAppendChat: async (chatId, userIds, messageContent, author) => {
+    createOrAppendChat: async (chatId, userIds, messageContent, author, messageRepliedTo) => {
         try {
 
             let chat = await Chat.findOne({ _id: chatId });
@@ -52,11 +52,12 @@ const chatService = {
                 seen: false,
                 filename: null,
                 text: messageContent,
+                messageRepliedTo: messageRepliedTo ? messageRepliedTo : null
             });
 
             const operationalMessage = await message.save();
 
-            message = await Message.findById(message._id).lean().populate('author').exec()
+            message = await Message.findById(message._id).lean().populate('author').populate("messageRepliedTo").exec()
 
 
             // Append the message to the chat
