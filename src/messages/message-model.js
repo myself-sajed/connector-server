@@ -36,8 +36,11 @@ const messageSchema = new Schema({
         enum: ['sent', 'delivered', 'seen'],
         default: 'sent'
     },
-    deliveredAt: Date,
-    seenAt: Date,
+    isEdited: {
+        type: Boolean,
+        default: false
+    }
+
 }, { timestamps: true });
 
 
