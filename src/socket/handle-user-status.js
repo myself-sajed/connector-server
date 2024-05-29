@@ -6,7 +6,6 @@ function handleUserStatus(io, socket, userSocketMap) {
 
 
     socket.on("client:typing", (selectedChat) => {
-        console.log('event triggered')
         const contact = selectedChat.contact._id
         let socketId = userSocketMap.get(contact)
         if (socketId) {
