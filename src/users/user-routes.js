@@ -7,7 +7,7 @@ const upload = multerConfig()
 
 router.get('/:loggedInUserId', userController.getUsers)
 router.get('/avatar/:filename', userController.getAvatar)
-router.post('/create', upload.single('avatar'), userValidator, userController.createUser)
+router.post('/create', userValidator, userController.createUser)
 
 
 export default router
