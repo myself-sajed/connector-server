@@ -71,9 +71,10 @@ const authController = {
         }
     },
 
-    logout: () => {
+    logout: (req, res) => {
+        console.log('logout')
         try {
-            res.clearCookie('token');
+            res.clearCookie('userToken');
             res.send({ status: 'success', message: 'User logged out successfully' });
         } catch (error) {
             res.send({ status: 'error', message: 'Something went wrong' });
