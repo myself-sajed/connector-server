@@ -33,6 +33,31 @@ function handleMessageOperations(io, socket, userSocketMap) {
             }
         })
     });
+
+    socket.on("message:client:delete", async ({ message, selectedChat }) => {
+        const { status, chat: serverChat, wasLastMessage } = await messageService.deleteMessage(message)
+        const author = message.author._id
+        if (status) {
+            const userIds = message.interactedUsers;
+
+            userIds.forEach((userId) => {
+                const socketId = userSocketMap.get(userId)
+                io.to(socketId).emit("message:server:delete", message)
+                const chat = {
+                    _id: selectedChat._id,
+                    me: userId === selectedChat?.me._id ? selectedChat?.me : selectedChat?.contact,
+                    contact: userId !== selectedChat?.me._id ? selectedChat?.me : selectedChat?.contact,
+                    lastMessage: wasLastMessage ? serverChat.lastMessage : message,
+                    chatable: true,
+                }
+
+                io.to(socketId).emit("chat:server", { chat, shouldUpdateCount: (userId === author), isEditing: true })
+            })
+
+        } else {
+            console.log('could not delete message')
+        }
+    })
 }
 
 export default handleMessageOperations

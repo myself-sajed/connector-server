@@ -32,10 +32,20 @@ const messageService = {
 
     deleteMessage: async (message) => {
         try {
+            const chat = await Chat.findOne({ _id: message.chatId }).populate("lastMessage").exec()
             await Message.findOneAndDelete({ _id: message._id })
-            return true
+            let wasLastMessage = false
+
+            if (message._id.toString() === chat.lastMessage._id.toString()) {
+                const searchLastMessage = await Message.findOne({ chatId: message.chatId }).sort({ updatedAt: -1 }).exec()
+                chat.lastMessage = searchLastMessage
+                await chat.save()
+                wasLastMessage = true
+            }
+            return { status: true, chat, wasLastMessage }
         } catch (error) {
-            return false
+            console.log(error)
+            return { status: false }
         }
     }
 }

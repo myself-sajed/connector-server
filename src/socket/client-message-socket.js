@@ -52,20 +52,7 @@ function handleOnClientMessage(io, socket, userSocketMap) {
 
     })
 
-    socket.on("message:client:delete", async (message) => {
-        const isDeleted = await messageService.deleteMessage(message)
 
-        if (isDeleted) {
-            const userIds = message.interactedUsers;
-
-            userIds.forEach((userId) => {
-                io.to(userSocketMap.get(userId)).emit("message:server:delete", message)
-            })
-
-        } else {
-            console.log('could not delete message')
-        }
-    })
 }
 
 
