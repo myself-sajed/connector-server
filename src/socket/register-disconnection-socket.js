@@ -1,9 +1,11 @@
-import Chat from "../chats/chat-model.js";
 import Message from "../messages/message-model.js";
 
 export function registerSocketUser(io, socket, userSocketMap) {
     socket.on('register', async (userId) => {
         userSocketMap.set(userId, socket.id); // Map user ID to socket ID
+
+        // send the online status to every user
+        socket.broadcast.emit("server:online-status", { status: "online", statusOf: userId })
 
         // Find and update undelivered messages
         const undeliveredMessages = await Message.find({ interactedUsers: { $in: [userId] }, status: 'sent', author: { $ne: userId } });
@@ -28,6 +30,7 @@ export function handleSocketDisconnection(socket, userSocketMap) {
         for (let [userId, socketId] of userSocketMap.entries()) {
             if (socketId === socket.id) {
                 userSocketMap.delete(userId);
+                socket.broadcast.emit("server:online-status", { status: "offline", statusOf: userId })
                 break;
             }
         }
