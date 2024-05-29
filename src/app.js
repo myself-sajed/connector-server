@@ -6,6 +6,7 @@ import http from 'http'
 import cors from 'cors'
 import config from "./lib/envConfig.js";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 
 // routes 
 import userRouter from './users/user-routes.js'
@@ -19,8 +20,13 @@ import handleSocket from "./socket/socket-server.js";
 
 // express config
 const app = express();
-app.use(cors())
+app.use(express.urlencoded({ extended: true }))
+app.use(cors({
+    origin: config.FRONTEND_URL,
+    credentials: true
+}))
 app.use(express.json());
+app.use(cookieParser());
 app.use(bodyParser.json());
 
 
@@ -28,7 +34,7 @@ app.use(bodyParser.json());
 const server = http.createServer(app);
 const io = new SocketServer(server, {
     cors: {
-        origin: config.FRONTEND_URL
+        origin: config.FRONTEND_URL,
     }
 });
 handleSocket(io)
