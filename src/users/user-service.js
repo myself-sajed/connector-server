@@ -8,6 +8,11 @@ const userService = {
         return await user.save()
     },
 
+    editUser: async ({ name, email, bio, avatar, userId }) => {
+        const user = await User.findOneAndUpdate({ _id: userId }, { name, email, bio: bio || "Let's Connect on Connector", avatar }, { new: true })
+        return user
+    },
+
     getUsers: async (loggedInUserId) => {
         const users = await User.find({ _id: { $ne: loggedInUserId } }).lean()
 
