@@ -4,7 +4,7 @@ import generateAvatarURL from "../utility/generateAvatarURL.js";
 import jwt from "jsonwebtoken"
 
 const authController = {
-    authenticate: (req, res) => {
+    authenticate: async (req, res) => {
 
         const userToken = req.cookies.userToken;
         try {
@@ -13,7 +13,10 @@ const authController = {
             } else {
                 const isVerified = jwt.verify(userToken, config.JWT_SECRET)
                 const decodedUser = jwt.decode(userToken, config.JWT_SECRET)
-                if (!isVerified) {
+
+                const user = await User.findOne({ _id: decodedUser._id })
+
+                if (!user) {
                     return res.send({ isAuth: false });
                 }
 
@@ -53,7 +56,9 @@ const authController = {
                 bio: user.bio
             };
 
-            const token = jwt.sign(tokenUser, process.env.JWT_SECRET, {
+            const JWT_SECRET = config.JWT_SECRET
+
+            const token = jwt.sign(tokenUser, JWT_SECRET, {
                 expiresIn: "1d",
             });
 

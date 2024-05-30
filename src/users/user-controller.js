@@ -1,6 +1,9 @@
 import { validationResult } from "express-validator";
 import userService from "./user-service.js";
 import path from "path"
+import generateAvatarURL from "../utility/generateAvatarURL.js";
+import jwt from "jsonwebtoken"
+import config from "../lib/envConfig.js";
 
 const userController = {
 
@@ -12,13 +15,36 @@ const userController = {
         }
 
         try {
-            const avatar = req.file.filename
-            const { name, email, bio, password } = req.body;
-            const user = await userService.createUser({ name, email, bio, avatar, password })
-            res.send(user)
+            const { name, email, bio, password, avatar } = req.body;
+            const avatarURL = `avatar-${avatar}.jpg`
+            const user = await userService.createUser({ name, email, bio, avatar: avatarURL, password })
+            const tokenUser = {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                avatar: generateAvatarURL(user.avatar),
+                bio: user.bio
+            };
+
+            const JWT_SECRET = config.JWT_SECRET
+
+
+            const token = jwt.sign(tokenUser, JWT_SECRET, {
+                expiresIn: "1d",
+            });
+
+            res.cookie("userToken", token, {
+                maxAge: 60 * 60 * 1000,
+                httpOnly: true,
+                sameSite: "strict",
+                domain: "localhost",
+            });
+            res.send({ status: "success", user })
         } catch (error) {
-            console.log('Error creating user', error)
+            console.log("Error creating user:", error)
+            res.send({ status: "error", message: "Could not create user" })
         }
+
     },
 
     getUsers: async (req, res) => {
