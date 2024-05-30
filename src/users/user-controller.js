@@ -39,7 +39,42 @@ const userController = {
                 sameSite: "strict",
                 domain: "localhost",
             });
-            res.send({ status: "success", user })
+            res.send({ status: "success", user: tokenUser })
+        } catch (error) {
+            console.log("Error creating user:", error)
+            res.send({ status: "error", message: "Could not create user" })
+        }
+
+    },
+
+    editUser: async (req, res, next) => {
+
+        try {
+            const { name, email, bio, avatar, userId } = req.body;
+            const avatarURL = `avatar-${avatar}.jpg`
+            const user = await userService.editUser({ name, email, bio, avatar: avatarURL, userId })
+            const tokenUser = {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                avatar: generateAvatarURL(user.avatar),
+                bio: user.bio
+            };
+
+            const JWT_SECRET = config.JWT_SECRET
+
+
+            const token = jwt.sign(tokenUser, JWT_SECRET, {
+                expiresIn: "1d",
+            });
+
+            res.cookie("userToken", token, {
+                maxAge: 60 * 60 * 1000,
+                httpOnly: true,
+                sameSite: "strict",
+                domain: "localhost",
+            });
+            res.send({ status: "success", user: tokenUser })
         } catch (error) {
             console.log("Error creating user:", error)
             res.send({ status: "error", message: "Could not create user" })
