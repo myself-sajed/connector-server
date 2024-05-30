@@ -8,6 +8,7 @@ const upload = multerConfig()
 router.get('/:loggedInUserId', userController.getUsers)
 router.get('/avatar/:filename', userController.getAvatar)
 router.post('/create', userValidator, userController.createUser)
+router.post('/edit', userController.editUser)
 
 
 export default router
