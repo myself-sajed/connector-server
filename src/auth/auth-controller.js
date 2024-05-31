@@ -12,15 +12,22 @@ const authController = {
                 return res.send({ isAuth: false });
             } else {
                 const isVerified = jwt.verify(userToken, config.JWT_SECRET)
-                const decodedUser = jwt.decode(userToken, config.JWT_SECRET)
 
-                const user = await User.findOne({ _id: decodedUser._id })
+                if (isVerified) {
+                    const decodedUser = jwt.decode(userToken, config.JWT_SECRET)
 
-                if (!user) {
+                    const user = await User.findOne({ _id: decodedUser._id })
+
+                    if (!user) {
+                        return res.send({ isAuth: false });
+                    }
+
+                    return res.send({ isAuth: true, user: decodedUser });
+                } else {
                     return res.send({ isAuth: false });
+
                 }
 
-                return res.send({ isAuth: true, user: decodedUser });
             }
         } catch (error) {
             console.log(error)
@@ -50,6 +57,7 @@ const authController = {
 
             const tokenUser = {
                 _id: user._id,
+                username: user.username,
                 name: user.name,
                 email: user.email,
                 avatar: generateAvatarURL(user.avatar),

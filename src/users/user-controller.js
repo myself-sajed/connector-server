@@ -15,17 +15,16 @@ const userController = {
         }
 
         try {
-            const { name, email, bio, password, avatar } = req.body;
-
-
+            const { username, name, email, bio, password, avatar } = req.body;
             const isUserALreadyExists = await userService.findByEmail(email.toLowerCase().trim())
 
             if (!isUserALreadyExists) {
                 const avatarURL = `avatar-${avatar}.jpg`
-                const user = await userService.createUser({ name, email: email.toLowerCase().trim(), bio, avatar: avatarURL, password })
+                const user = await userService.createUser({ username, name, email: email.toLowerCase().trim(), bio, avatar: avatarURL, password })
 
                 const tokenUser = {
                     _id: user._id,
+                    username: user.username,
                     name: user.name,
                     email: user.email,
                     avatar: generateAvatarURL(user.avatar),
@@ -60,11 +59,12 @@ const userController = {
     editUser: async (req, res, next) => {
 
         try {
-            const { name, email, bio, avatar, userId } = req.body;
+            const { username, name, email, bio, avatar, userId } = req.body;
             const avatarURL = `avatar-${avatar}.jpg`
-            const user = await userService.editUser({ name, email: email.toLowerCase().trim(), bio, avatar: avatarURL, userId })
+            const user = await userService.editUser({ username, name, email: email.toLowerCase().trim(), bio, avatar: avatarURL, userId })
             const tokenUser = {
                 _id: user._id,
+                username: user.username,
                 name: user.name,
                 email: user.email,
                 avatar: generateAvatarURL(user.avatar),
@@ -111,6 +111,21 @@ const userController = {
         } catch (error) {
             console.log('error in get avatar in user-controller', error);
             res.send(null)
+        }
+    },
+
+    checkUsername: async (req, res) => {
+        try {
+            const { username } = req.body;
+            const user = await userService.checkUsername(username)
+
+            if (user) {
+                res.send({ status: "success", isValid: false })
+            } else {
+                res.send({ status: "success", isValid: true })
+            }
+        } catch (error) {
+            res.send({ status: "error" })
         }
     }
 }

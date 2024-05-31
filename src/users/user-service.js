@@ -7,13 +7,13 @@ const userService = {
         return await User.findOne({ email: email })
     },
 
-    createUser: async ({ name, email, bio, avatar, password }) => {
-        const user = new User({ name, email, bio: bio || "Let's Connect on Connector", avatar, password })
+    createUser: async ({ username, name, email, bio, avatar, password }) => {
+        const user = new User({ username, name, email, bio: bio || "Let's Connect on Connector", avatar, password })
         return await user.save()
     },
 
-    editUser: async ({ name, email, bio, avatar, userId }) => {
-        const user = await User.findOneAndUpdate({ _id: userId }, { name, email, bio: bio || "Let's Connect on Connector", avatar }, { new: true })
+    editUser: async ({ username, name, email, bio, avatar, userId }) => {
+        const user = await User.findOneAndUpdate({ _id: userId }, { username, name, email, bio: bio || "Let's Connect on Connector", avatar }, { new: true })
         return user
     },
 
@@ -34,6 +34,10 @@ const userService = {
         }
 
 
+    },
+
+    checkUsername: async (username) => {
+        return await User.findOne({ username }).lean();
     }
 }
 
