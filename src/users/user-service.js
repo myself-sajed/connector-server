@@ -3,6 +3,10 @@ import User from './user-model.js'
 
 const userService = {
 
+    findByEmail: async (email) => {
+        return await User.findOne({ email: email })
+    },
+
     createUser: async ({ name, email, bio, avatar, password }) => {
         const user = new User({ name, email, bio: bio || "Let's Connect on Connector", avatar, password })
         return await user.save()

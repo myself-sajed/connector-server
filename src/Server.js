@@ -20,4 +20,9 @@ const startServer = async () => {
     }
 };
 
-startServer();
+
+try {
+    startServer();
+} catch (error) {
+    console.log('Error starting the server :', error);
+}
