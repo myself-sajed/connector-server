@@ -27,6 +27,7 @@ function handleOnClientMessage(io, socket, userSocketMap) {
                 io.to(socketId).emit("chat:server", { chat, shouldUpdateCount: (userId === author) })
 
                 if (userId !== author) { // only update status for the recipient
+                    io.to(socketId).emit("chat:notification", chat)
                     operationalMessage.status = 'delivered';
                     await operationalMessage.save();
                     io.to(userSocketMap.get(author)).emit("message:status:update", { messageId: operationalMessage._id, status: 'delivered' });
