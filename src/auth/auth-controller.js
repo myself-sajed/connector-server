@@ -73,6 +73,8 @@ const authController = {
             const isProduction = config.NODE_ENV === 'prod';
             const frontEndDomain = config.DOMAIN
 
+            console.log(isProduction, frontEndDomain, config)
+
             res.cookie("userToken", token, {
                 maxAge: 60 * 60 * 1000,
                 httpOnly: true,
