@@ -71,7 +71,9 @@ const authController = {
             });
 
             const isProduction = config.NODE_ENV === 'prod';
-            const frontEndDomain = config.FRONTEND_URL
+            const frontEndDomain = config.DOMAIN
+
+            console.log(config, isProduction, frontEndDomain);
 
             res.cookie("userToken", token, {
                 maxAge: 60 * 60 * 1000,
