@@ -70,11 +70,15 @@ const authController = {
                 expiresIn: "1d",
             });
 
+            const isProduction = config.NODE_ENV === 'prod';
+            const frontEndDomain = config.FRONTEND_URL
+
             res.cookie("userToken", token, {
                 maxAge: 60 * 60 * 1000,
                 httpOnly: true,
                 sameSite: "strict",
-                domain: "localhost",
+                secure: isProduction,
+                domain: frontEndDomain,
             });
 
             return res.json({ status: "success", message: "User logged in successfully", token });
