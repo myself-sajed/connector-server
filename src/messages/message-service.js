@@ -3,15 +3,21 @@ import Message from "./message-model.js"
 
 
 const messageService = {
-    getMessages: async (chatId) => {
+    getMessages: async (chatId, page = 1, limit = 20) => {
         try {
-            const messages = await Message.find({ chatId }).lean().populate("author").populate("messageRepliedTo").exec();
-            return messages || []
+            const messages = await Message.find({ chatId })
+                .sort({ createdAt: -1 }) // Sort messages by creation date in descending order
+                .skip((page - 1) * limit) // Skip messages for pagination
+                .limit(limit) // Limit the number of messages per page
+                .lean()
+                .populate("author")
+                .populate("messageRepliedTo")
+                .exec();
+            return messages || [];
         } catch (error) {
-            console.log('error occured in getting messages:', error)
-            return []
+            console.log('error occurred in getting messages:', error);
+            return [];
         }
-
     },
 
     editMessage: async (messageId, messageContent, chatId) => {
