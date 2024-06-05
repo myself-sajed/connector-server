@@ -78,7 +78,7 @@ const authController = {
             res.cookie("userToken", token, {
                 maxAge: 60 * 60 * 1000,
                 httpOnly: true,
-                sameSite: "strict",
+
                 secure: isProduction,
                 domain: frontEndDomain,
             });
