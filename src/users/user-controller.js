@@ -47,6 +47,7 @@ const userController = {
 
                     secure: isProduction,
                     domain: frontEndDomain,
+                    sameSite: !isProduction ? 'strict' : 'none'
                 });
                 res.send({ status: "success", user: tokenUser })
             } else {
@@ -91,6 +92,7 @@ const userController = {
 
                 secure: isProduction,
                 domain: frontEndDomain,
+                sameSite: !isProduction ? 'strict' : 'none'
             });
 
 
