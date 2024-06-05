@@ -4,6 +4,7 @@ import path from "path"
 import generateAvatarURL from "../utility/generateAvatarURL.js";
 import jwt from "jsonwebtoken"
 import config from "../lib/envConfig.js";
+import cookieSetter from "../auth/cookie-setter.js";
 
 const userController = {
 
@@ -38,17 +39,8 @@ const userController = {
                     expiresIn: "1d",
                 });
 
-                const isProduction = config.NODE_ENV === 'prod';
-                const frontEndDomain = config.DOMAIN
+                cookieSetter(res, token)
 
-                res.cookie("userToken", token, {
-                    maxAge: 60 * 60 * 1000,
-                    httpOnly: true,
-
-                    secure: isProduction,
-                    domain: frontEndDomain,
-                    sameSite: !isProduction ? 'strict' : 'none'
-                });
                 res.send({ status: "success", user: tokenUser })
             } else {
                 res.send({ status: "error", message: "The Email is already registered" })
@@ -83,19 +75,7 @@ const userController = {
                 expiresIn: "1d",
             });
 
-            const isProduction = config.NODE_ENV === 'prod';
-            const frontEndDomain = config.DOMAIN
-
-            res.cookie("userToken", token, {
-                maxAge: 60 * 60 * 1000,
-                httpOnly: true,
-
-                secure: isProduction,
-                domain: frontEndDomain,
-                sameSite: !isProduction ? 'strict' : 'none'
-            });
-
-
+            cookieSetter(res, token)
             res.send({ status: "success", user: tokenUser })
         } catch (error) {
             console.log("Error creating user:", error)

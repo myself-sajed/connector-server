@@ -2,6 +2,7 @@ import config from "../lib/envConfig.js";
 import User from "../users/user-model.js";
 import generateAvatarURL from "../utility/generateAvatarURL.js";
 import jwt from "jsonwebtoken"
+import cookieSetter from "./cookie-setter.js";
 
 const authController = {
     authenticate: async (req, res) => {
@@ -70,18 +71,7 @@ const authController = {
                 expiresIn: "1d",
             });
 
-            const isProduction = config.NODE_ENV === 'prod';
-            const frontEndDomain = config.DOMAIN
-
-            console.log(isProduction, frontEndDomain, config)
-
-            res.cookie("userToken", token, {
-                maxAge: 60 * 60 * 1000,
-                httpOnly: true,
-                secure: isProduction,
-                domain: frontEndDomain,
-                sameSite: !isProduction ? 'strict' : 'none'
-            });
+            cookieSetter(res, token)
 
             return res.json({ status: "success", message: "User logged in successfully", token });
         } catch (error) {
