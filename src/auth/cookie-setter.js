@@ -11,7 +11,6 @@ function cookieSetter(res, token) {
         httpOnly: true,
         secure: isProduction,
         sameSite: !isProduction ? 'strict' : 'none',
-        domain: frontEndDomain
     });
 }
 
