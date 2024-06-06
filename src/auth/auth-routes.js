@@ -4,7 +4,7 @@ import authController from './auth-controller.js';
 const router = Router();
 
 
-router.get('/authenticate', authController.authenticate)
+router.post('/authenticate', authController.authenticate)
 
 router.post('/login', authController.login)
 
