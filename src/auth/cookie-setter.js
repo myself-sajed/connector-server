@@ -10,7 +10,8 @@ function cookieSetter(res, token) {
         maxAge: ((60 * 60 * 1000) * 24) * 7, // 1 hour
         httpOnly: true,
         secure: isProduction,
-        sameSite: !isProduction ? 'strict' : 'none'
+        sameSite: !isProduction ? 'strict' : 'none',
+        domain: frontEndDomain
     });
 }
 
