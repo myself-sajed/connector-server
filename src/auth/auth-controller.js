@@ -2,12 +2,11 @@ import config from "../lib/envConfig.js";
 import User from "../users/user-model.js";
 import generateAvatarURL from "../utility/generateAvatarURL.js";
 import jwt from "jsonwebtoken"
-import cookieSetter from "./cookie-setter.js";
 
 const authController = {
     authenticate: async (req, res) => {
 
-        const userToken = req.cookies.userToken;
+        const { userToken } = req.body;
         try {
             if (!userToken) {
                 return res.send({ isAuth: false });
@@ -70,8 +69,6 @@ const authController = {
             const token = jwt.sign(tokenUser, JWT_SECRET, {
                 expiresIn: "1d",
             });
-
-            cookieSetter(res, token)
 
             return res.json({ status: "success", message: "User logged in successfully", token });
         } catch (error) {

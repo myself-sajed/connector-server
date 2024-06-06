@@ -39,9 +39,7 @@ const userController = {
                     expiresIn: "1d",
                 });
 
-                cookieSetter(res, token)
-
-                res.send({ status: "success", user: tokenUser })
+                res.send({ status: "success", user: tokenUser, token })
             } else {
                 res.send({ status: "error", message: "The Email is already registered" })
             }
@@ -75,8 +73,7 @@ const userController = {
                 expiresIn: "1d",
             });
 
-            cookieSetter(res, token)
-            res.send({ status: "success", user: tokenUser })
+            res.send({ status: "success", user: tokenUser, token })
         } catch (error) {
             console.log("Error creating user:", error)
             res.send({ status: "error", message: "Could not create user" })
