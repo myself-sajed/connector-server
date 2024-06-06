@@ -2,7 +2,7 @@ import config from "../lib/envConfig.js";
 
 function cookieSetter(res, token) {
     const isProduction = config.NODE_ENV === 'prod';
-    const frontEndDomain = config.DOMAIN.startsWith('.') ? config.DOMAIN : `.${config.DOMAIN}`;
+    const frontEndDomain = config.DOMAIN
 
     console.log(isProduction, frontEndDomain, config);
 
