@@ -7,10 +7,12 @@ function cookieSetter(res, token) {
     console.log(isProduction, frontEndDomain, config);
 
     res.cookie("userToken", token, {
-        maxAge: ((60 * 60 * 1000) * 24) * 7, // 1 hour
+        maxAge: ((60 * 60 * 1000) * 24) * 7, // 7 days
         httpOnly: true,
         secure: isProduction,
-        sameSite: !isProduction ? 'strict' : 'none',
+        sameSite: 'None',
+        domain: frontEndDomain,
+        path: '/'
     });
 }
 
