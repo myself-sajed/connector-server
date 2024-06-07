@@ -132,7 +132,13 @@ function chatFormatter(chats, meId) {
                 createdAt: otherUser.createdAt,
                 updatedAt: otherUser.updatedAt,
             } : null,
-            lastMessage: chat.lastMessage || null,
+            lastMessage: chat.lastMessage ? {
+                _id: chat.lastMessage._id.toString(),
+                author: { _id: chat.lastMessage.author },
+                text: chat.lastMessage.text,
+                status: chat.lastMessage.status,
+                updatedAt: chat.lastMessage.updatedAt
+            } : null,
             createdAt: chat.createdAt.toISOString() || null,
             updatedAt: chat.updatedAt.toISOString() || null,
         };
