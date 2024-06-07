@@ -1,7 +1,5 @@
 import chatService from "../chats/chat-service.js";
 import messageModel from "../messages/message-model.js";
-import chatModel from "../chats/chat-model.js";
-import messageService from "../messages/message-service.js";
 
 
 function handleOnClientMessage(io, socket, userSocketMap) {
@@ -10,6 +8,24 @@ function handleOnClientMessage(io, socket, userSocketMap) {
         const { selectedChat, messageContent, author, tempMessageId, messageRepliedTo } = chatData;
         const userIds = [selectedChat?.me._id, selectedChat?.contact._id];
         const chatId = selectedChat?._id
+
+        userIds.forEach((userId) => {
+            const socketId = userSocketMap.get(userId)
+            if (userId === author) {
+                const chat = {
+                    _id: selectedChat._id,
+                    me: userId === selectedChat?.me._id ? selectedChat?.me : selectedChat?.contact,
+                    contact: userId !== selectedChat?.me._id ? selectedChat?.me : selectedChat?.contact,
+                    lastMessage: { author: { _id: author }, status: "optimistic", text: messageContent },
+                    chatable: true,
+                }
+
+                io.to(socketId).emit("chat:server", { chat, shouldUpdateCount: (userId === author) })
+            }
+        })
+
+
+
         const { message, operationalMessage } = await chatService.createOrAppendChat(chatId, userIds, messageContent, author, messageRepliedTo);
 
         userIds.forEach(async (userId) => {
